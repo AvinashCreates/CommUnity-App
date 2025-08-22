@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,9 +21,10 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useReports } from "@/hooks/useReports";
-import { useAuth } from "@/hooks/useAuth";
-import AuthRequiredMessage from "./AuthRequiredMessage";
+import { useReports } from '@/hooks/useReports';
+import { useAuth } from '@/hooks/useAuth';
+import { useLocation } from '@/hooks/useLocation';
+import AuthRequiredMessage from './AuthRequiredMessage';
 
 const ReportSection = () => {
   const [selectedCategory, setSelectedCategory] = useState("");

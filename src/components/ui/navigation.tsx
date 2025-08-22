@@ -1,7 +1,18 @@
-import { cn } from "@/lib/utils";
-import { Button } from "./button";
-import { Badge } from "./badge";
-import { Bell, Map, MessageSquare, Users, Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { 
+  FileText, 
+  Megaphone, 
+  Store, 
+  Users, 
+  LogOut,
+  UserCircle,
+  Bell,
+  Settings
+} from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/components/ui/use-toast";
 
 interface NavigationProps {
   activeTab: string;
@@ -9,31 +20,24 @@ interface NavigationProps {
 }
 
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
+  const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Signed out",
+      description: "You have been signed out successfully."
+    });
+  };
+
   const navItems = [
-    { 
-      id: "reports", 
-      label: "Report Issue", 
-      icon: MessageSquare,
-      badge: null
-    },
-    { 
-      id: "announcements", 
-      label: "Announcements", 
-      icon: Bell,
-      badge: "3"
-    },
-    { 
-      id: "vendors", 
-      label: "Find Services", 
-      icon: Map,
-      badge: null
-    },
-    { 
-      id: "community", 
-      label: "Community", 
-      icon: Users,
-      badge: null
-    }
+    { id: "reports", label: "Reports", icon: FileText },
+    { id: "announcements", label: "Announcements", icon: Megaphone },
+    { id: "vendors", label: "Vendors", icon: Store },
+    { id: "community", label: "Community", icon: Users },
+    ...(isAdmin ? [{ id: "admin", label: "Admin", icon: Settings }] : []),
   ];
 
   return (
@@ -47,7 +51,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
             <h1 className="text-xl font-bold text-foreground">CommUnity</h1>
           </div>
           
-          <div className="hidden md:flex space-x-1">
+          <div className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -60,19 +64,23 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                 >
                   <Icon className="w-4 h-4 mr-2" />
                   {item.label}
-                  {item.badge && (
-                    <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-                      {item.badge}
-                    </Badge>
-                  )}
                 </Button>
               );
             })}
+            
+            {user && (
+              <div className="flex items-center space-x-2 ml-4 pl-4 border-l border-border">
+                <Button variant="ghost" size="sm">
+                  <UserCircle className="w-4 h-4 mr-2" />
+                  {user.email}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            )}
           </div>
-
-          <Button variant="ghost" size="sm" className="md:hidden">
-            <Menu className="w-5 h-5" />
-          </Button>
         </div>
       </div>
     </nav>

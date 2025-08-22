@@ -7,7 +7,7 @@ export interface Report {
   location_lat: number | null;
   location_lng: number | null;
   image_url?: string;
-  status: 'draft' | 'submitted' | 'in_progress' | 'resolved';
+  status: string;
   priority: 'low' | 'medium' | 'high';
   created_at: string;
   updated_at: string;
@@ -18,8 +18,8 @@ export interface Announcement {
   id: string;
   title: string;
   content: string;
-  type: 'alert' | 'maintenance' | 'event' | 'update';
-  priority: 'low' | 'medium' | 'high';
+  type: string;
+  priority: string;
   authority: string;
   created_at: string;
   location: string;
@@ -30,18 +30,21 @@ export interface Vendor {
   id: string;
   name: string;
   category: string;
-  rating: number;
-  reviews: number;
-  distance: string;
+  rating?: number;
+  reviews?: number;
+  reviews_count?: number;
+  distance?: string;
   phone: string;
   email?: string;
   address: string;
-  hours: string;
-  verified: boolean;
-  description: string;
-  services: string[];
+  hours?: string;
+  verified?: boolean;
+  description?: string;
+  services?: string[];
   image?: string;
+  image_url?: string;
   isFavorite?: boolean;
+  created_at?: string;
 }
 
 export interface User {

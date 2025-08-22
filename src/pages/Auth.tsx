@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Auth = () => {
   const { user, loading, signIn, signUp } = useAuth();
@@ -14,7 +15,8 @@ const Auth = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    name: ''
+    name: '',
+    role: 'user'
   });
 
   if (loading) {
@@ -46,7 +48,15 @@ const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    await signUp(formData.email, formData.password, formData.name);
+    const { error } = await signUp(formData.email, formData.password, formData.name);
+    
+    // If signup successful and user wants admin role, update their role
+    if (!error && formData.role === 'admin') {
+      // Note: In a production app, admin role assignment should be restricted
+      // This is just for demonstration purposes
+      console.log('Admin role requested - would need approval in production');
+    }
+    
     setIsLoading(false);
   };
 
@@ -101,7 +111,7 @@ const Auth = () => {
             
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
+                  <div className="space-y-2">
                   <Label htmlFor="signup-name">Full Name</Label>
                   <Input
                     id="signup-name"
@@ -112,6 +122,22 @@ const Auth = () => {
                     onChange={handleInputChange}
                     required
                   />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="signup-role">Account Type</Label>
+                  <Select 
+                    value={formData.role} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, role: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">Community Member</SelectItem>
+                      <SelectItem value="admin">Administrator</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>

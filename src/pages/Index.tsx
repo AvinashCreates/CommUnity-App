@@ -5,9 +5,14 @@ import ReportSection from "@/components/sections/ReportSection";
 import AnnouncementsSection from "@/components/sections/AnnouncementsSection";
 import VendorsSection from "@/components/sections/VendorsSection";
 import CommunitySection from "@/components/sections/CommunitySection";
+import AdminDashboard from "@/components/admin/AdminDashboard";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("hero");
+  const { user } = useAuth();
+  const { isAdmin } = useUserRole();
 
   const handleGetStarted = () => {
     setActiveTab("reports");
@@ -23,6 +28,8 @@ const Index = () => {
         return <VendorsSection />;
       case "community":
         return <CommunitySection />;
+      case "admin":
+        return isAdmin ? <AdminDashboard /> : <HeroSection onGetStarted={handleGetStarted} />;
       default:
         return <HeroSection onGetStarted={handleGetStarted} />;
     }
