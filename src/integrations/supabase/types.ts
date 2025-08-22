@@ -396,6 +396,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_community_post: {
+        Args: { post_id: string }
+        Returns: boolean
+      }
+      ensure_default_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
