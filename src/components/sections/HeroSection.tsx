@@ -18,12 +18,6 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div className="text-center lg:text-left">
-            <div className="flex items-center justify-center lg:justify-start mb-6">
-              <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                <WifiOff className="w-3 h-3 mr-2" />
-                Works Offline First
-              </Badge>
-            </div>
             
             <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
               Empowering 

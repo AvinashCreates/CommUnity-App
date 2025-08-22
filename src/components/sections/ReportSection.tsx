@@ -10,7 +10,6 @@ import {
   Camera, 
   MapPin, 
   Send, 
-  WifiOff, 
   Tag,
   Upload,
   CheckCircle,
@@ -18,7 +17,8 @@ import {
   Eye,
   Trash2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useReports } from '@/hooks/useReports';
@@ -41,6 +41,7 @@ const ReportSection = () => {
     deleteReport, 
     refreshReports 
   } = useReports();
+  const { location, loading: locationLoading, getCurrentLocation, clearLocation } = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -103,28 +104,26 @@ const ReportSection = () => {
     e.preventDefault();
     if (!title.trim() || !description.trim() || !selectedCategory) return;
     
+    // Check if location is available
+    if (!location) {
+      toast({
+        title: "Location Required",
+        description: "Please get your current location first.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
-      console.log('Submitting report with data:', {
-        title: title.trim(),
-        description: description.trim(),
-        category: selectedCategory,
-        location_address: "123 Main St, Downtown",
-        location_lat: 40.7128,
-        location_lng: -74.0060,
-        image_url: uploadedImage || undefined,
-        status: 'submitted',
-        priority: 'medium'
-      });
-
       const result = await createReport({
         title: title.trim(),
         description: description.trim(),
         category: selectedCategory,
-        location_address: "123 Main St, Downtown", // This would come from GPS
-        location_lat: 40.7128,
-        location_lng: -74.0060,
+        location_address: location.address || `${location.latitude}, ${location.longitude}`,
+        location_lat: location.latitude,
+        location_lng: location.longitude,
         image_url: uploadedImage || undefined,
         status: 'submitted',
         priority: 'medium'
@@ -141,7 +140,10 @@ const ReportSection = () => {
       setUploadedImage(null);
       setActiveTab("submitted");
 
-      console.log('Report submitted successfully');
+      toast({
+        title: "Report Submitted",
+        description: "Your report has been submitted successfully.",
+      });
     } catch (error) {
       console.error('Error submitting report:', error);
       toast({
@@ -177,7 +179,7 @@ const ReportSection = () => {
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-foreground mb-4">Report a Civic Issue</h2>
         <p className="text-muted-foreground">
-          Help improve your community by reporting local issues. Works offline - syncs automatically when connected.
+          Help improve your community by reporting local issues.
         </p>
       </div>
 
@@ -192,14 +194,10 @@ const ReportSection = () => {
         <TabsContent value="new" className="mt-6">
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Camera className="w-5 h-5 mr-2 text-primary" />
-                Create New Report
-                <Badge variant="outline" className="ml-auto">
-                  <WifiOff className="w-3 h-3 mr-1" />
-                  Offline Ready
-                </Badge>
-              </CardTitle>
+                <CardTitle className="flex items-center">
+                  <Camera className="w-5 h-5 mr-2 text-primary" />
+                  Create New Report
+                </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -265,23 +263,55 @@ const ReportSection = () => {
                   {/* Location */}
                   <div>
                     <Label className="text-sm font-medium">Location</Label>
-                    <Card className="p-4 bg-muted/50 mt-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <MapPin className="w-4 h-4 text-success mr-2" />
-                          <div>
-                            <div className="text-sm font-medium">Current Location</div>
-                            <div className="text-xs text-muted-foreground">
-                              123 Main St, Downtown
+                    {location ? (
+                      <Card className="p-4 bg-muted/50 mt-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <MapPin className="w-4 h-4 text-success mr-2" />
+                            <div>
+                              <div className="text-sm font-medium">Current Location</div>
+                              <div className="text-xs text-muted-foreground">
+                                {location.address}
+                              </div>
                             </div>
                           </div>
+                          <div className="flex gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              GPS Lock
+                            </Badge>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={clearLocation}
+                            >
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
                         </div>
-                        <Badge variant="outline" className="text-xs">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          GPS Lock
-                        </Badge>
+                      </Card>
+                    ) : (
+                      <div className="mt-1">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={getCurrentLocation}
+                          disabled={locationLoading}
+                          className="w-full"
+                        >
+                          {locationLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          ) : (
+                            <MapPin className="h-4 w-4 mr-2" />
+                          )}
+                          Get My Current Location
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Location is required to submit a report
+                        </p>
                       </div>
-                    </Card>
+                    )}
                   </div>
                 </div>
 
@@ -325,7 +355,7 @@ const ReportSection = () => {
                 <div className="flex justify-end space-x-4">
                   <Button 
                     type="submit" 
-                    disabled={!title.trim() || !selectedCategory || !description.trim() || isSubmitting}
+                    disabled={!title.trim() || !selectedCategory || !description.trim() || !location || isSubmitting}
                     className="min-w-[120px]"
                   >
                     {isSubmitting ? (

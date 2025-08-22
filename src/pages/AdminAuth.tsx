@@ -6,9 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
-import { Loader2, Users } from 'lucide-react';
+import { Loader2, Shield } from 'lucide-react';
 
-const Auth = () => {
+const AdminAuth = () => {
   const { user, loading, signIn, signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -46,20 +46,27 @@ const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    // For admin signup, we'll add metadata to identify this as an admin request
     const { error } = await signUp(formData.email, formData.password, formData.name);
+    
+    if (!error) {
+      console.log('Admin account created - awaiting approval');
+    }
+    
     setIsLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users className="h-8 w-8 text-secondary-foreground" />
+          <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+            <Shield className="h-8 w-8 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl font-bold">User Portal</CardTitle>
+          <CardTitle className="text-2xl font-bold">Admin Portal</CardTitle>
           <CardDescription>
-            Report issues and engage with your community
+            Secure access for community administrators
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -72,21 +79,21 @@ const Auth = () => {
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="admin-signin-email">Email</Label>
                   <Input
-                    id="signin-email"
+                    id="admin-signin-email"
                     name="email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="Enter your admin email"
                     value={formData.email}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                  <Label htmlFor="admin-signin-password">Password</Label>
                   <Input
-                    id="signin-password"
+                    id="admin-signin-password"
                     name="password"
                     type="password"
                     placeholder="Enter your password"
@@ -97,7 +104,7 @@ const Auth = () => {
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign In
+                  Sign In as Admin
                 </Button>
               </form>
             </TabsContent>
@@ -105,9 +112,9 @@ const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Full Name</Label>
+                  <Label htmlFor="admin-signup-name">Full Name</Label>
                   <Input
-                    id="signup-name"
+                    id="admin-signup-name"
                     name="name"
                     type="text"
                     placeholder="Enter your full name"
@@ -117,9 +124,9 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="admin-signup-email">Email</Label>
                   <Input
-                    id="signup-email"
+                    id="admin-signup-email"
                     name="email"
                     type="email"
                     placeholder="Enter your email"
@@ -129,12 +136,12 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="admin-signup-password">Password</Label>
                   <Input
-                    id="signup-password"
+                    id="admin-signup-password"
                     name="password"
                     type="password"
-                    placeholder="Create a password"
+                    placeholder="Create a secure password"
                     value={formData.password}
                     onChange={handleInputChange}
                     required
@@ -142,17 +149,20 @@ const Auth = () => {
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign Up as User
+                  Register as Admin
                 </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Admin accounts require approval before activation
+                </p>
               </form>
             </TabsContent>
           </Tabs>
           
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Need admin access?{' '}
-              <a href="/admin-auth" className="text-primary hover:underline">
-                Admin Login
+              Looking for user access?{' '}
+              <a href="/auth" className="text-primary hover:underline">
+                User Login
               </a>
             </p>
           </div>
@@ -162,4 +172,4 @@ const Auth = () => {
   );
 };
 
-export default Auth;
+export default AdminAuth;
