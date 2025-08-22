@@ -20,14 +20,27 @@ export const useReports = () => {
   }, [user]);
 
   const fetchReports = async () => {
+    if (!user) {
+      console.log('No user found, cannot fetch reports');
+      setReports([]);
+      setLoading(false);
+      return;
+    }
+
     try {
+      console.log('Fetching reports for user:', user.id);
       const { data, error } = await supabase
         .from('reports')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching reports:', error);
+        throw error;
+      }
 
+      console.log('Fetched reports:', data);
       const mappedReports: Report[] = data.map(report => ({
         ...report,
         status: report.status as Report['status'],
@@ -38,9 +51,10 @@ export const useReports = () => {
 
       setReports(mappedReports);
     } catch (error: any) {
+      console.error('Failed to fetch reports:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch reports",
+        description: "Failed to fetch reports: " + error.message,
         variant: "destructive"
       });
     } finally {
@@ -49,20 +63,42 @@ export const useReports = () => {
   };
 
   const createReport = async (reportData: Omit<Report, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
-    if (!user) return { error: new Error('User not authenticated') };
+    if (!user) {
+      console.log('No user found, cannot create report');
+      return { error: new Error('User not authenticated') };
+    }
 
     try {
+      console.log('Creating report with data:', reportData);
+      console.log('User ID:', user.id);
+      
+      const insertData = {
+        user_id: user.id,
+        title: reportData.title,
+        description: reportData.description,
+        category: reportData.category,
+        location_address: reportData.location_address,
+        location_lat: reportData.location_lat,
+        location_lng: reportData.location_lng,
+        image_url: reportData.image_url,
+        status: reportData.status,
+        priority: reportData.priority
+      };
+
+      console.log('Insert data:', insertData);
+
       const { data, error } = await supabase
         .from('reports')
-        .insert({
-          user_id: user.id,
-          ...reportData
-        })
+        .insert(insertData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error inserting report:', error);
+        throw error;
+      }
 
+      console.log('Report created successfully:', data);
       await fetchReports();
       
       toast({
@@ -72,9 +108,10 @@ export const useReports = () => {
 
       return { data, error: null };
     } catch (error: any) {
+      console.error('Failed to create report:', error);
       toast({
         title: "Error",
-        description: "Failed to create report",
+        description: "Failed to create report: " + error.message,
         variant: "destructive"
       });
       return { data: null, error };

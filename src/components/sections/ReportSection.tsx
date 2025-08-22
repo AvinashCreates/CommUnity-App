@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useReports } from "@/hooks/useReports";
+import { useAuth } from "@/hooks/useAuth";
+import AuthRequiredMessage from "./AuthRequiredMessage";
 
 const ReportSection = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -30,6 +32,7 @@ const ReportSection = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("new");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user, loading: authLoading } = useAuth();
   const { 
     reports, 
     loading, 
@@ -39,6 +42,31 @@ const ReportSection = () => {
   } = useReports();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Show authentication required message if user is not logged in
+  if (authLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="text-center">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-foreground mb-4">Report a Civic Issue</h2>
+          <p className="text-muted-foreground">
+            Help improve your community by reporting local issues.
+          </p>
+        </div>
+        <AuthRequiredMessage />
+      </div>
+    );
+  }
 
   const categories = [
     { id: "pothole", label: "Road Issues", color: "bg-destructive" },
@@ -77,7 +105,19 @@ const ReportSection = () => {
     setIsSubmitting(true);
     
     try {
-      await createReport({
+      console.log('Submitting report with data:', {
+        title: title.trim(),
+        description: description.trim(),
+        category: selectedCategory,
+        location_address: "123 Main St, Downtown",
+        location_lat: 40.7128,
+        location_lng: -74.0060,
+        image_url: uploadedImage || undefined,
+        status: 'submitted',
+        priority: 'medium'
+      });
+
+      const result = await createReport({
         title: title.trim(),
         description: description.trim(),
         category: selectedCategory,
@@ -89,20 +129,23 @@ const ReportSection = () => {
         priority: 'medium'
       });
 
-      toast({
-        title: "Report Submitted Successfully",
-        description: "Your report has been submitted.",
-      });
-      
+      if (result.error) {
+        throw result.error;
+      }
+
+      // Reset form on success
       setTitle("");
       setDescription("");
       setSelectedCategory("");
       setUploadedImage(null);
       setActiveTab("submitted");
+
+      console.log('Report submitted successfully');
     } catch (error) {
+      console.error('Error submitting report:', error);
       toast({
         title: "Error",
-        description: "Failed to submit report",
+        description: "Failed to submit report. Please try again.",
         variant: "destructive"
       });
     } finally {
