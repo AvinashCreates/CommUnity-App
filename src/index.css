@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* CommUnity Design System - Civic & Community Colors */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    /* Primary - Trust Blue for government/civic actions */
+    --primary: 215 84% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 215 84% 40%;
+
+    /* Secondary - Community Green for local actions */
+    --secondary: 142 71% 45%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 142 71% 40%;
+
+    /* Muted - Subtle backgrounds */
+    --muted: 210 20% 94%;
+    --muted-foreground: 215 15% 45%;
+
+    /* Accent - Warm orange for highlights */
+    --accent: 25 85% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Status colors */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 45 93% 55%;
+    --warning-foreground: 215 25% 15%;
+    
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 88%;
+    --input: 210 20% 94%;
+    --ring: 215 84% 45%;
+
+    /* Custom CommUnity tokens */
+    --civic-blue: 215 84% 45%;
+    --community-green: 142 71% 45%;
+    --trust-gradient: linear-gradient(135deg, hsl(215 84% 45%), hsl(142 71% 45%));
+    --hero-gradient: linear-gradient(135deg, hsl(215 84% 45%) 0%, hsl(215 84% 55%) 50%, hsl(142 71% 45%) 100%);
+    --card-shadow: 0 4px 12px hsl(215 25% 15% / 0.08);
+    --card-shadow-hover: 0 8px 24px hsl(215 25% 15% / 0.12);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Dark mode for CommUnity */
+    --background: 215 25% 8%;
+    --foreground: 210 20% 92%;
+
+    --card: 215 25% 10%;
+    --card-foreground: 210 20% 92%;
+
+    --popover: 215 25% 10%;
+    --popover-foreground: 210 20% 92%;
+
+    --primary: 215 84% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 215 84% 50%;
+
+    --secondary: 142 71% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 142 71% 45%;
+
+    --muted: 215 25% 12%;
+    --muted-foreground: 215 15% 65%;
+
+    --accent: 25 85% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --success: 142 71% 50%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 45 93% 60%;
+    --warning-foreground: 215 25% 8%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 25% 15%;
+    --input: 215 25% 12%;
+    --ring: 215 84% 55%;
+
+    /* Dark mode custom tokens */
+    --civic-blue: 215 84% 55%;
+    --community-green: 142 71% 50%;
+    --trust-gradient: linear-gradient(135deg, hsl(215 84% 55%), hsl(142 71% 50%));
+    --hero-gradient: linear-gradient(135deg, hsl(215 84% 55%) 0%, hsl(215 84% 65%) 50%, hsl(142 71% 50%) 100%);
+    --card-shadow: 0 4px 12px hsl(0 0% 0% / 0.2);
+    --card-shadow-hover: 0 8px 24px hsl(0 0% 0% / 0.3);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
