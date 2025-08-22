@@ -93,114 +93,121 @@ const VendorsSection = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-foreground mb-4">Trusted Local Services</h2>
-        <p className="text-muted-foreground">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6">
+      <div className="text-center mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Trusted Local Services</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Find verified local vendors and service providers in your community.
         </p>
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="all">
-            All Vendors {filteredVendors.length > 0 && <Badge variant="secondary" className="ml-1">{filteredVendors.length}</Badge>}
-          </TabsTrigger>
-          <TabsTrigger value="favorites">
-            Favorites {actualFavoriteVendors.length > 0 && <Badge variant="secondary" className="ml-1">{actualFavoriteVendors.length}</Badge>}
-          </TabsTrigger>
-          <TabsTrigger value="verified">
-            Verified {vendors.filter(v => v.verified).length > 0 && <Badge variant="secondary" className="ml-1">{vendors.filter(v => v.verified).length}</Badge>}
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList className="grid w-full min-w-fit grid-cols-3">
+            <TabsTrigger value="all" className="text-xs sm:text-sm">
+              All Vendors {filteredVendors.length > 0 && <Badge variant="secondary" className="ml-1 text-xs">{filteredVendors.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="favorites" className="text-xs sm:text-sm">
+              Favorites {actualFavoriteVendors.length > 0 && <Badge variant="secondary" className="ml-1 text-xs">{actualFavoriteVendors.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="verified" className="text-xs sm:text-sm">
+              Verified {vendors.filter(v => v.verified).length > 0 && <Badge variant="secondary" className="ml-1 text-xs">{vendors.filter(v => v.verified).length}</Badge>}
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="all" className="mt-6">
+        <TabsContent value="all" className="mt-4 sm:mt-6">
           {/* Search and Filters */}
-          <div className="mb-6 space-y-4">
-            <div className="flex flex-col md:flex-row gap-4">
+          <div className="mb-4 sm:mb-6 space-y-4">
+            <div className="flex flex-col gap-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Search vendors, services, or categories..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 text-sm sm:text-base"
                 />
               </div>
               
-              <div className="flex gap-2">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-3 py-2 border border-input rounded-md text-sm"
-                >
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as "rating" | "distance" | "reviews")}
-                  className="px-3 py-2 border border-input rounded-md text-sm"
-                >
-                  <option value="rating">Rating</option>
-                  <option value="distance">Distance</option>
-                  <option value="reviews">Reviews</option>
-                </select>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={toggleSort}
-                >
-                  {sortOrder === "asc" ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
-                </Button>
-                
-                <div className="flex rounded-md border">
-                  <Button
-                    variant={viewMode === "grid" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("grid")}
-                    className="rounded-r-none"
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex gap-2 flex-1">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="flex-1 px-3 py-2 border border-input rounded-md text-sm"
                   >
-                    <Grid className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("list")}
-                    className="rounded-l-none"
+                    {categories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as "rating" | "distance" | "reviews")}
+                    className="flex-1 px-3 py-2 border border-input rounded-md text-sm"
                   >
-                    <List className="w-4 h-4" />
+                    <option value="rating">Rating</option>
+                    <option value="distance">Distance</option>
+                    <option value="reviews">Reviews</option>
+                  </select>
+                </div>
+
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={toggleSort}
+                  >
+                    {sortOrder === "asc" ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
                   </Button>
+                  
+                  <div className="flex rounded-md border">
+                    <Button
+                      variant={viewMode === "grid" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setViewMode("grid")}
+                      className="rounded-r-none"
+                    >
+                      <Grid className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === "list" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setViewMode("list")}
+                      className="rounded-l-none"
+                    >
+                      <List className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Vendors Grid/List */}
-          <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-4"}>
+          <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" : "space-y-4"}>
             {filteredVendors.map((vendor) => {
               const isFavorite = favoriteVendors.includes(vendor.id);
               return (
                 <Card key={vendor.id} className="shadow-card hover:shadow-card-hover transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
-                      <CardTitle className="text-lg flex items-center">
-                        {vendor.name}
+                      <CardTitle className="text-base sm:text-lg flex items-center flex-1 min-w-0">
+                        <span className="truncate">{vendor.name}</span>
                         {vendor.verified && (
-                          <Badge variant="secondary" className="ml-2 text-xs">
+                          <Badge variant="secondary" className="ml-2 text-xs flex-shrink-0">
                             <Shield className="w-3 h-3 mr-1" />
-                            Verified
+                            <span className="hidden sm:inline">Verified</span>
                           </Badge>
                         )}
                       </CardTitle>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => toggleFavorite(vendor.id)}
+                          className="p-1"
                         >
                           {isFavorite ? (
                             <Heart className="w-4 h-4 text-destructive fill-current" />
@@ -208,11 +215,11 @@ const VendorsSection = () => {
                             <HeartOff className="w-4 h-4" />
                           )}
                         </Button>
-                        <Badge variant="outline">{vendor.category}</Badge>
+                        <Badge variant="outline" className="text-xs">{vendor.category}</Badge>
                       </div>
                     </div>
                     
-                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                    <div className="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm text-muted-foreground flex-wrap">
                       <div className="flex items-center">
                         <Star className="w-3 h-3 mr-1 text-warning fill-current" />
                         {vendor.rating} ({vendor.reviews})
@@ -225,48 +232,58 @@ const VendorsSection = () => {
                   </CardHeader>
                   
                   <CardContent>
-                    <p className="text-sm text-muted-foreground mb-3">{vendor.description}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2">{vendor.description}</p>
                     
                     <div className="space-y-2 mb-4">
-                      <div className="flex items-center text-sm">
-                        <MapPin className="w-3 h-3 mr-2 text-muted-foreground" />
-                        {vendor.address}
+                      <div className="flex items-center text-xs sm:text-sm">
+                        <MapPin className="w-3 h-3 mr-2 text-muted-foreground flex-shrink-0" />
+                        <span className="truncate">{vendor.address}</span>
                       </div>
-                      <div className="flex items-center text-sm">
-                        <Clock className="w-3 h-3 mr-2 text-muted-foreground" />
-                        {vendor.hours}
+                      <div className="flex items-center text-xs sm:text-sm">
+                        <Clock className="w-3 h-3 mr-2 text-muted-foreground flex-shrink-0" />
+                        <span className="truncate">{vendor.hours}</span>
                       </div>
                     </div>
 
                     <div className="flex flex-wrap gap-1 mb-4">
-                      {vendor.services.map((service, idx) => (
+                      {vendor.services.slice(0, 3).map((service, idx) => (
                         <Badge key={idx} variant="outline" className="text-xs">
                           {service}
                         </Badge>
                       ))}
+                      {vendor.services.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{vendor.services.length - 3} more
+                        </Badge>
+                      )}
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Button 
                         size="sm" 
-                        className="flex-1"
+                        className="flex-1 text-xs sm:text-sm"
                         onClick={() => callVendor(vendor.phone, vendor.name)}
                       >
                         <Phone className="w-3 h-3 mr-1" />
                         Call
                       </Button>
-                      {vendor.email && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => emailVendor(vendor.email!, vendor.name)}
-                        >
-                          <Mail className="w-3 h-3" />
+                      <div className="flex gap-2">
+                        {vendor.email && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => emailVendor(vendor.email!, vendor.name)}
+                            className="flex-1 sm:flex-none"
+                          >
+                            <Mail className="w-3 h-3" />
+                            <span className="sm:hidden ml-1">Email</span>
+                          </Button>
+                        )}
+                        <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
+                          <ExternalLink className="w-3 h-3" />
+                          <span className="sm:hidden ml-1">View</span>
                         </Button>
-                      )}
-                      <Button variant="outline" size="sm">
-                        <ExternalLink className="w-3 h-3" />
-                      </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

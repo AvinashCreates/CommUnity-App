@@ -50,7 +50,7 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
             </div>
             
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-white/20">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-12 pt-8 border-t border-white/20">
               <div className="text-center">
                 <div className="text-2xl font-bold text-white">1,247</div>
                 <div className="text-sm text-white/80">Issues Resolved</div>

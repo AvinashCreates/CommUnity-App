@@ -87,32 +87,32 @@ const AnnouncementsSection = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-foreground mb-4">Local Announcements</h2>
-        <p className="text-muted-foreground">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
+      <div className="text-center mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Local Announcements</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Stay updated with verified announcements from local authorities. Available offline.
         </p>
       </div>
 
       {/* Search and Filters */}
-      <div className="mb-6 space-y-4">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="mb-4 sm:mb-6 space-y-4">
+        <div className="flex flex-col gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search announcements..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 text-sm sm:text-base"
             />
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="px-3 py-2 border border-input rounded-md text-sm"
+              className="flex-1 px-3 py-2 border border-input rounded-md text-sm"
             >
               <option value="all">All Types</option>
               <option value="alert">Alerts</option>
@@ -124,7 +124,7 @@ const AnnouncementsSection = () => {
             <select
               value={selectedPriority}
               onChange={(e) => setSelectedPriority(e.target.value)}
-              className="px-3 py-2 border border-input rounded-md text-sm"
+              className="flex-1 px-3 py-2 border border-input rounded-md text-sm"
             >
               <option value="all">All Priorities</option>
               <option value="high">High</option>
@@ -136,17 +136,19 @@ const AnnouncementsSection = () => {
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="all">
-            All {filteredAnnouncements.length > 0 && <Badge variant="secondary" className="ml-1">{filteredAnnouncements.length}</Badge>}
-          </TabsTrigger>
-          <TabsTrigger value="unread">
-            Unread {unreadCount > 0 && <Badge variant="destructive" className="ml-1">{unreadCount}</Badge>}
-          </TabsTrigger>
-          <TabsTrigger value="read">
-            Read {readCount > 0 && <Badge variant="secondary" className="ml-1">{readCount}</Badge>}
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList className="grid w-full min-w-fit grid-cols-3">
+            <TabsTrigger value="all" className="text-xs sm:text-sm">
+              All {filteredAnnouncements.length > 0 && <Badge variant="secondary" className="ml-1 text-xs">{filteredAnnouncements.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="unread" className="text-xs sm:text-sm">
+              Unread {unreadCount > 0 && <Badge variant="destructive" className="ml-1 text-xs">{unreadCount}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="read" className="text-xs sm:text-sm">
+              Read {readCount > 0 && <Badge variant="secondary" className="ml-1 text-xs">{readCount}</Badge>}
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="all" className="mt-6">
           <div className="space-y-4">

@@ -175,32 +175,34 @@ const ReportSection = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-foreground mb-4">Report a Civic Issue</h2>
-        <p className="text-muted-foreground">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
+      <div className="text-center mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-4">Report a Civic Issue</h2>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Help improve your community by reporting local issues.
         </p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="new">New Report</TabsTrigger>
-          <TabsTrigger value="submitted">
-            Submitted {reports.length > 0 && <Badge variant="secondary" className="ml-1">{reports.length}</Badge>}
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList className="grid w-full min-w-fit grid-cols-2">
+            <TabsTrigger value="new" className="text-xs sm:text-sm">New Report</TabsTrigger>
+            <TabsTrigger value="submitted" className="text-xs sm:text-sm">
+              Submitted {reports.length > 0 && <Badge variant="secondary" className="ml-1 text-xs">{reports.length}</Badge>}
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="new" className="mt-6">
+        <TabsContent value="new" className="mt-4 sm:mt-6">
           <Card className="shadow-card">
             <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Camera className="w-5 h-5 mr-2 text-primary" />
+                <CardTitle className="flex items-center text-base sm:text-lg">
+                  <Camera className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-primary" />
                   Create New Report
                 </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* Title */}
                 <div>
                   <Label htmlFor="title" className="text-sm font-medium">
@@ -211,26 +213,26 @@ const ReportSection = () => {
                     placeholder="Brief title for the issue..."
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="mt-1"
+                    className="mt-1 text-sm sm:text-base"
                   />
                 </div>
 
                 {/* Photo Upload */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <Label className="text-sm font-medium">Add Photo</Label>
                     <div 
-                      className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer mt-1"
+                      className="border-2 border-dashed border-border rounded-lg p-4 sm:p-6 text-center hover:border-primary/50 transition-colors cursor-pointer mt-1"
                       onClick={() => fileInputRef.current?.click()}
                     >
                       {uploadedImage ? (
                         <div className="relative">
-                          <img src={uploadedImage} alt="Uploaded" className="w-full h-32 object-cover rounded-lg" />
+                          <img src={uploadedImage} alt="Uploaded" className="w-full h-24 sm:h-32 object-cover rounded-lg" />
                           <Button
                             type="button"
                             variant="destructive"
                             size="sm"
-                            className="absolute top-1 right-1"
+                            className="absolute top-1 right-1 h-6 w-6 p-0"
                             onClick={(e) => {
                               e.stopPropagation();
                               setUploadedImage(null);
@@ -241,8 +243,8 @@ const ReportSection = () => {
                         </div>
                       ) : (
                         <>
-                          <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                          <p className="text-sm text-muted-foreground">
+                          <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground mx-auto mb-2" />
+                          <p className="text-xs sm:text-sm text-muted-foreground">
                             Click to upload or drag and drop
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
@@ -321,17 +323,17 @@ const ReportSection = () => {
                     <Tag className="w-4 h-4 inline mr-1" />
                     Issue Category *
                   </Label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 mt-2">
                     {categories.map((category) => (
                       <Button
                         key={category.id}
                         type="button"
                         variant={selectedCategory === category.id ? "default" : "outline"}
                         onClick={() => setSelectedCategory(category.id)}
-                        className="justify-start p-3 h-auto"
+                        className="justify-start p-2 sm:p-3 h-auto text-xs sm:text-sm"
                       >
-                        <div className={`w-3 h-3 rounded-full ${category.color} mr-2`} />
-                        {category.label}
+                        <div className={`w-3 h-3 rounded-full ${category.color} mr-2 flex-shrink-0`} />
+                        <span className="truncate">{category.label}</span>
                       </Button>
                     ))}
                   </div>
@@ -347,22 +349,22 @@ const ReportSection = () => {
                     placeholder="Describe the issue in detail..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="min-h-[100px] mt-1"
+                    className="min-h-[80px] sm:min-h-[100px] mt-1 text-sm sm:text-base"
                   />
                 </div>
 
                 {/* Submit */}
-                <div className="flex justify-end space-x-4">
+                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
                   <Button 
                     type="submit" 
                     disabled={!title.trim() || !selectedCategory || !description.trim() || !location || isSubmitting}
-                    className="min-w-[120px]"
+                    className="min-w-[120px] text-sm sm:text-base"
                   >
                     {isSubmitting ? (
                       "Submitting..."
                     ) : (
                       <>
-                        <Send className="w-4 h-4 mr-2" />
+                        <Send className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                         Submit Report
                       </>
                     )}

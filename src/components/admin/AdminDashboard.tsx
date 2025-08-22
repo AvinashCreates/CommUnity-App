@@ -125,12 +125,14 @@ const AdminDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full lg:w-fit grid-cols-4 lg:grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="vendors">Vendors</TabsTrigger>
-            <TabsTrigger value="announcements">Announcements</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto">
+            <TabsList className="grid w-full min-w-fit grid-cols-4">
+              <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+              <TabsTrigger value="reports" className="text-xs sm:text-sm">Reports</TabsTrigger>
+              <TabsTrigger value="vendors" className="text-xs sm:text-sm">Vendors</TabsTrigger>
+              <TabsTrigger value="announcements" className="text-xs sm:text-sm">Announcements</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="overview" className="space-y-6">
             {/* Stats Grid */}
