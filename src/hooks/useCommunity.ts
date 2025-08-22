@@ -335,6 +335,36 @@ export const useCommunity = () => {
     }
   };
 
+  const deletePost = async (postId: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to delete posts",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.rpc('delete_community_post', { post_id: postId });
+
+      if (error) throw error;
+
+      await fetchPosts();
+      
+      toast({
+        title: "Success",
+        description: "Post deleted successfully"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete post",
+        variant: "destructive"
+      });
+    }
+  };
+
   return {
     posts,
     events,
@@ -342,6 +372,7 @@ export const useCommunity = () => {
     attendingEvents,
     loading,
     createPost,
+    deletePost,
     toggleLike,
     toggleAttendance,
     refreshPosts: fetchPosts,

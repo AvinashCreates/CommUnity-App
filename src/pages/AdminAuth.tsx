@@ -39,7 +39,24 @@ const AdminAuth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    await signIn(formData.email, formData.password);
+    
+    // Handle default admin credentials
+    if (formData.email === 'admin@community.local' && formData.password === 'admin123') {
+      // Try to sign in with default credentials, create if doesn't exist
+      let { error } = await signIn(formData.email, formData.password);
+      
+      if (error) {
+        // If sign in fails, try to create the default admin account
+        const signUpResult = await signUp(formData.email, formData.password, 'System Administrator');
+        if (!signUpResult.error) {
+          // After creating, try to sign in again
+          await signIn(formData.email, formData.password);
+        }
+      }
+    } else {
+      await signIn(formData.email, formData.password);
+    }
+    
     setIsLoading(false);
   };
 
@@ -159,6 +176,11 @@ const AdminAuth = () => {
           </Tabs>
           
           <div className="mt-6 text-center">
+            <div className="p-3 bg-muted rounded-lg mb-4">
+              <p className="text-sm font-medium text-muted-foreground mb-1">Default Admin Credentials:</p>
+              <p className="text-xs text-muted-foreground">Email: admin@community.local</p>
+              <p className="text-xs text-muted-foreground">Password: admin123</p>
+            </div>
             <p className="text-sm text-muted-foreground">
               Looking for user access?{' '}
               <a href="/auth" className="text-primary hover:underline">
