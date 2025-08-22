@@ -53,30 +53,44 @@ export const useCommunity = () => {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch posts first
+      const { data: postsData, error: postsError } = await supabase
         .from('community_posts')
-        .select(`
-          *,
-          profiles!community_posts_user_id_fkey (name, avatar_url)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (postsError) throw postsError;
 
-      const mappedPosts: CommunityPost[] = data.map(post => ({
-        id: post.id,
-        author: {
-          name: post.profiles?.name || 'Anonymous',
-          avatar: post.profiles?.avatar_url || '',
-          id: post.user_id
-        },
-        content: post.content,
-        type: post.type as CommunityPost['type'],
-        timestamp: post.created_at,
-        likes: post.likes_count,
-        comments: post.comments_count,
-        tags: post.tags || []
-      }));
+      // Fetch unique user profiles for the authors
+      const userIds = [...new Set(postsData.map(post => post.user_id))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, name, avatar_url')
+        .in('user_id', userIds);
+
+      // Create profiles lookup
+      const profilesMap = new Map();
+      profilesData?.forEach(profile => {
+        profilesMap.set(profile.user_id, profile);
+      });
+
+      const mappedPosts: CommunityPost[] = postsData.map(post => {
+        const profile = profilesMap.get(post.user_id);
+        return {
+          id: post.id,
+          author: {
+            name: profile?.name || 'Anonymous',
+            avatar: profile?.avatar_url || '',
+            id: post.user_id
+          },
+          content: post.content,
+          type: post.type as CommunityPost['type'],
+          timestamp: post.created_at,
+          likes: post.likes_count,
+          comments: post.comments_count,
+          tags: post.tags || []
+        };
+      });
 
       setPosts(mappedPosts);
     } catch (error: any) {
@@ -90,29 +104,43 @@ export const useCommunity = () => {
 
   const fetchEvents = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch events first
+      const { data: eventsData, error: eventsError } = await supabase
         .from('community_events')
-        .select(`
-          *,
-          profiles!community_events_user_id_fkey (name)
-        `)
+        .select('*')
         .order('event_date', { ascending: true });
 
-      if (error) throw error;
+      if (eventsError) throw eventsError;
 
-      const mappedEvents: CommunityEvent[] = data.map(event => ({
-        id: event.id,
-        title: event.title,
-        description: event.description,
-        date: event.event_date,
-        time: event.event_time,
-        location: event.location,
-        attendees: event.attendees_count,
-        organizer: {
-          name: event.profiles?.name || 'Anonymous',
-          id: event.user_id
-        }
-      }));
+      // Fetch unique user profiles for the organizers
+      const userIds = [...new Set(eventsData.map(event => event.user_id))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, name')
+        .in('user_id', userIds);
+
+      // Create profiles lookup
+      const profilesMap = new Map();
+      profilesData?.forEach(profile => {
+        profilesMap.set(profile.user_id, profile);
+      });
+
+      const mappedEvents: CommunityEvent[] = eventsData.map(event => {
+        const profile = profilesMap.get(event.user_id);
+        return {
+          id: event.id,
+          title: event.title,
+          description: event.description,
+          date: event.event_date,
+          time: event.event_time,
+          location: event.location,
+          attendees: event.attendees_count,
+          organizer: {
+            name: profile?.name || 'Anonymous',
+            id: event.user_id
+          }
+        };
+      });
 
       setEvents(mappedEvents);
     } catch (error: any) {
@@ -213,8 +241,11 @@ export const useCommunity = () => {
 
         if (error) throw error;
 
-        // Update likes count
-        await supabase.rpc('decrement_post_likes', { post_id: postId });
+        // Update likes count manually
+        await supabase
+          .from('community_posts')
+          .update({ likes_count: posts.find(p => p.id === postId)?.likes - 1 || 0 })
+          .eq('id', postId);
 
         setLikedPosts(prev => prev.filter(id => id !== postId));
       } else {
@@ -227,8 +258,11 @@ export const useCommunity = () => {
 
         if (error) throw error;
 
-        // Update likes count
-        await supabase.rpc('increment_post_likes', { post_id: postId });
+        // Update likes count manually
+        await supabase
+          .from('community_posts')
+          .update({ likes_count: (posts.find(p => p.id === postId)?.likes || 0) + 1 })
+          .eq('id', postId);
 
         setLikedPosts(prev => [...prev, postId]);
       }
@@ -265,8 +299,11 @@ export const useCommunity = () => {
 
         if (error) throw error;
 
-        // Update attendees count
-        await supabase.rpc('decrement_event_attendees', { event_id: eventId });
+        // Update attendees count manually
+        await supabase
+          .from('community_events')
+          .update({ attendees_count: Math.max((events.find(e => e.id === eventId)?.attendees || 0) - 1, 0) })
+          .eq('id', eventId);
 
         setAttendingEvents(prev => prev.filter(id => id !== eventId));
       } else {
@@ -279,8 +316,11 @@ export const useCommunity = () => {
 
         if (error) throw error;
 
-        // Update attendees count
-        await supabase.rpc('increment_event_attendees', { event_id: eventId });
+        // Update attendees count manually
+        await supabase
+          .from('community_events')
+          .update({ attendees_count: (events.find(e => e.id === eventId)?.attendees || 0) + 1 })
+          .eq('id', eventId);
 
         setAttendingEvents(prev => [...prev, eventId]);
       }
