@@ -13,86 +13,28 @@ import {
   CheckCircle,
   Download,
   Search,
-  Filter,
   Eye,
   Bell,
   BellOff
 } from "lucide-react";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useAnnouncements } from "@/hooks/useAnnouncements";
 import { useToast } from "@/hooks/use-toast";
-import { Announcement } from "@/types";
 
 const AnnouncementsSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("all");
   const [selectedPriority, setSelectedPriority] = useState("all");
-  const [readAnnouncements, setReadAnnouncements] = useLocalStorage<string[]>("read_announcements", []);
+  const { 
+    announcements, 
+    readAnnouncements, 
+    loading, 
+    markAsRead, 
+    markAsUnread,
+    refreshAnnouncements 
+  } = useAnnouncements();
   const { toast } = useToast();
 
-  const announcements: Announcement[] = [
-    {
-      id: "1",
-      title: "Water Supply Maintenance Schedule",
-      content: "Planned water supply maintenance in Downtown area from 2 AM to 6 AM on March 15th, 2024. Please store adequate water.",
-      type: "maintenance",
-      priority: "high",
-      authority: "Water Department",
-      timestamp: "2 hours ago",
-      location: "Downtown Area",
-      isOffline: true
-    },
-    {
-      id: "2",
-      title: "New Recycling Guidelines",
-      content: "Updated recycling guidelines effective April 1st. Please separate plastic containers by type. Download the new guide.",
-      type: "update",
-      priority: "medium",
-      authority: "Waste Management",
-      timestamp: "1 day ago",
-      location: "City-wide",
-      hasAttachment: true
-    },
-    {
-      id: "3",
-      title: "Community Health Fair",
-      content: "Free health checkups and vaccinations at Central Park Community Center. Open to all residents.",
-      type: "event",
-      priority: "low",
-      authority: "Health Department",
-      timestamp: "3 days ago",
-      location: "Central Park"
-    },
-    {
-      id: "4",
-      title: "Road Closure - Main Street",
-      content: "Main Street will be closed between 1st and 3rd Avenue for emergency repairs. Expected completion: March 20th.",
-      type: "alert",
-      priority: "high",
-      authority: "Transportation",
-      timestamp: "5 days ago",
-      location: "Main Street"
-    }
-  ];
-
-  const markAsRead = (id: string) => {
-    if (!readAnnouncements.includes(id)) {
-      setReadAnnouncements(prev => [...prev, id]);
-      toast({
-        title: "Marked as Read",
-        description: "Announcement marked as read.",
-      });
-    }
-  };
-
-  const markAsUnread = (id: string) => {
-    setReadAnnouncements(prev => prev.filter(readId => readId !== id));
-    toast({
-      title: "Marked as Unread",
-      description: "Announcement marked as unread.",
-    });
-  };
-
-  const downloadAttachment = (announcement: Announcement) => {
+  const downloadAttachment = (announcement: any) => {
     toast({
       title: "Download Started",
       description: `Downloading attachment for: ${announcement.title}`,
@@ -133,6 +75,16 @@ const AnnouncementsSection = () => {
         return "secondary";
     }
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="text-center">
+          <p>Loading announcements...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -208,7 +160,7 @@ const AnnouncementsSection = () => {
                         <Megaphone className="w-5 h-5 mr-2 text-primary" />
                         {announcement.title}
                         {!isRead && <div className="w-2 h-2 bg-primary rounded-full ml-2" />}
-                        {announcement.isOffline && (
+                        {!navigator.onLine && (
                           <Badge variant="outline" className="ml-2 text-xs">
                             Cached
                           </Badge>
@@ -225,7 +177,7 @@ const AnnouncementsSection = () => {
                     <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                       <div className="flex items-center">
                         <Clock className="w-3 h-3 mr-1" />
-                        {announcement.timestamp}
+                        {new Date(announcement.created_at).toLocaleDateString()}
                       </div>
                       <div className="flex items-center">
                         <MapPin className="w-3 h-3 mr-1" />
@@ -242,7 +194,7 @@ const AnnouncementsSection = () => {
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        {announcement.hasAttachment && (
+                        {announcement.attachment_url && (
                           <Button 
                             variant="outline" 
                             size="sm"
@@ -310,7 +262,7 @@ const AnnouncementsSection = () => {
                   
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-muted-foreground">
-                      {announcement.timestamp} • {announcement.location}
+                      {new Date(announcement.created_at).toLocaleDateString()} • {announcement.location}
                     </div>
                     <Button
                       variant="outline"
@@ -361,7 +313,7 @@ const AnnouncementsSection = () => {
                   
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-muted-foreground">
-                      {announcement.timestamp} • {announcement.location}
+                      {new Date(announcement.created_at).toLocaleDateString()} • {announcement.location}
                     </div>
                     <Button
                       variant="ghost"
@@ -390,7 +342,7 @@ const AnnouncementsSection = () => {
 
       {/* Load More */}
       <div className="text-center mt-8">
-        <Button variant="outline">
+        <Button variant="outline" onClick={refreshAnnouncements}>
           Load More Announcements
         </Button>
       </div>

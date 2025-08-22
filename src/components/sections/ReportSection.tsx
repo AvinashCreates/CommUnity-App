@@ -21,18 +21,22 @@ import {
   AlertCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Report } from "@/types";
+import { useReports } from "@/hooks/useReports";
 
 const ReportSection = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [description, setDescription] = useState("");
   const [title, setTitle] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("new");
-  const [reports, setReports] = useLocalStorage<Report[]>("civic_reports", []);
-  const [drafts, setDrafts] = useLocalStorage<Report[]>("civic_drafts", []);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { 
+    reports, 
+    loading, 
+    createReport, 
+    deleteReport, 
+    refreshReports 
+  } = useReports();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -44,8 +48,6 @@ const ReportSection = () => {
     { id: "electricity", label: "Power Issues", color: "bg-accent" },
     { id: "other", label: "Other", color: "bg-muted" }
   ];
-
-  const generateId = () => Math.random().toString(36).substr(2, 9);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -74,101 +76,50 @@ const ReportSection = () => {
     
     setIsSubmitting(true);
     
-    const newReport: Report = {
-      id: generateId(),
-      title: title.trim(),
-      description: description.trim(),
-      category: selectedCategory,
-      location: {
-        address: "123 Main St, Downtown",
-        coordinates: { lat: 40.7128, lng: -74.0060 }
-      },
-      image: uploadedImage || undefined,
-      status: 'submitted',
-      priority: 'medium',
-      timestamp: new Date().toISOString(),
-      isOffline: !navigator.onLine
-    };
-    
-    // Simulate API call
-    setTimeout(() => {
-      setReports(prev => [newReport, ...prev]);
+    try {
+      await createReport({
+        title: title.trim(),
+        description: description.trim(),
+        category: selectedCategory,
+        location_address: "123 Main St, Downtown", // This would come from GPS
+        location_lat: 40.7128,
+        location_lng: -74.0060,
+        image_url: uploadedImage || undefined,
+        priority: 'medium'
+      });
+
       toast({
         title: "Report Submitted Successfully",
-        description: "Your report has been saved locally and will sync when online.",
+        description: "Your report has been submitted.",
       });
-      setIsSubmitting(false);
+      
       setTitle("");
       setDescription("");
       setSelectedCategory("");
       setUploadedImage(null);
       setActiveTab("submitted");
-    }, 2000);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit report",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSaveDraft = () => {
-    if (!title.trim() && !description.trim()) return;
-    
-    const draft: Report = {
-      id: generateId(),
-      title: title.trim() || "Untitled Draft",
-      description: description.trim(),
-      category: selectedCategory,
-      location: {
-        address: "123 Main St, Downtown",
-        coordinates: { lat: 40.7128, lng: -74.0060 }
-      },
-      image: uploadedImage || undefined,
-      status: 'draft',
-      priority: 'medium',
-      timestamp: new Date().toISOString()
-    };
-    
-    setDrafts(prev => [draft, ...prev]);
-    toast({
-      title: "Draft Saved",
-      description: "Your report draft has been saved locally.",
-    });
-    setTitle("");
-    setDescription("");
-    setSelectedCategory("");
-    setUploadedImage(null);
-  };
-
-  const loadDraft = (draft: Report) => {
-    setTitle(draft.title);
-    setDescription(draft.description);
-    setSelectedCategory(draft.category);
-    setUploadedImage(draft.image || null);
-    setActiveTab("new");
-  };
-
-  const deleteDraft = (id: string) => {
-    setDrafts(prev => prev.filter(d => d.id !== id));
-    toast({
-      title: "Draft Deleted",
-      description: "The draft has been removed.",
-    });
-  };
-
-  const deleteReport = (id: string) => {
-    setReports(prev => prev.filter(r => r.id !== id));
-    toast({
-      title: "Report Deleted",
-      description: "The report has been removed.",
-    });
-  };
-
-  const getStatusBadge = (status: Report['status']) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
       case 'draft': return <Badge variant="outline">Draft</Badge>;
       case 'submitted': return <Badge variant="secondary">Submitted</Badge>;
       case 'in_progress': return <Badge variant="default">In Progress</Badge>;
       case 'resolved': return <Badge variant="secondary" className="bg-success">Resolved</Badge>;
+      default: return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  const getPriorityIcon = (priority: Report['priority']) => {
+  const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case 'high': return <AlertCircle className="w-4 h-4 text-destructive" />;
       case 'medium': return <Clock className="w-4 h-4 text-warning" />;
@@ -186,11 +137,8 @@ const ReportSection = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="new">New Report</TabsTrigger>
-          <TabsTrigger value="drafts">
-            Drafts {drafts.length > 0 && <Badge variant="secondary" className="ml-1">{drafts.length}</Badge>}
-          </TabsTrigger>
           <TabsTrigger value="submitted">
             Submitted {reports.length > 0 && <Badge variant="secondary" className="ml-1">{reports.length}</Badge>}
           </TabsTrigger>
@@ -330,9 +278,6 @@ const ReportSection = () => {
 
                 {/* Submit */}
                 <div className="flex justify-end space-x-4">
-                  <Button type="button" variant="outline" onClick={handleSaveDraft}>
-                    Save Draft
-                  </Button>
                   <Button 
                     type="submit" 
                     disabled={!title.trim() || !selectedCategory || !description.trim() || isSubmitting}
@@ -353,66 +298,13 @@ const ReportSection = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="drafts" className="mt-6">
-          <div className="space-y-4">
-            {drafts.length === 0 ? (
-              <Card className="p-8 text-center">
-                <div className="text-muted-foreground">
-                  <Tag className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium mb-2">No Drafts</h3>
-                  <p>Your draft reports will appear here.</p>
-                </div>
-              </Card>
-            ) : (
-              drafts.map((draft) => (
-                <Card key={draft.id} className="shadow-card">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-medium">{draft.title}</h3>
-                          {getStatusBadge(draft.status)}
-                          {draft.category && (
-                            <Badge variant="outline" className="text-xs">
-                              {categories.find(c => c.id === draft.category)?.label}
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                          {draft.description}
-                        </p>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(draft.timestamp).toLocaleString()}
-                        </div>
-                      </div>
-                      <div className="flex gap-2 ml-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => loadDraft(draft)}
-                        >
-                          <Eye className="w-3 h-3 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => deleteDraft(draft.id)}
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </TabsContent>
-
         <TabsContent value="submitted" className="mt-6">
           <div className="space-y-4">
-            {reports.length === 0 ? (
+            {loading ? (
+              <Card className="p-8 text-center">
+                <p>Loading reports...</p>
+              </Card>
+            ) : reports.length === 0 ? (
               <Card className="p-8 text-center">
                 <div className="text-muted-foreground">
                   <Send className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -430,33 +322,25 @@ const ReportSection = () => {
                           <h3 className="font-medium">{report.title}</h3>
                           {getStatusBadge(report.status)}
                           {getPriorityIcon(report.priority)}
-                          {report.category && (
-                            <Badge variant="outline" className="text-xs">
-                              {categories.find(c => c.id === report.category)?.label}
-                            </Badge>
-                          )}
-                          {report.isOffline && (
-                            <Badge variant="outline" className="text-xs">
-                              <WifiOff className="w-3 h-3 mr-1" />
-                              Offline
-                            </Badge>
-                          )}
+                          <Badge variant="outline" className="text-xs">
+                            {categories.find(c => c.id === report.category)?.label}
+                          </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
                           {report.description}
                         </p>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>{new Date(report.timestamp).toLocaleString()}</span>
+                          <span>{new Date(report.created_at).toLocaleString()}</span>
                           <span className="flex items-center">
                             <MapPin className="w-3 h-3 mr-1" />
-                            {report.location.address}
+                            {report.location_address}
                           </span>
                         </div>
                       </div>
                       <div className="flex gap-2 ml-4">
-                        {report.image && (
+                        {report.image_url && (
                           <div className="w-16 h-16 rounded-lg overflow-hidden">
-                            <img src={report.image} alt="Report" className="w-full h-full object-cover" />
+                            <img src={report.image_url} alt="Report" className="w-full h-full object-cover" />
                           </div>
                         )}
                         <Button

@@ -21,9 +21,8 @@ import {
   SortAsc,
   SortDesc
 } from "lucide-react";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useVendors } from "@/hooks/useVendors";
 import { useToast } from "@/hooks/use-toast";
-import { Vendor } from "@/types";
 
 const VendorsSection = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,85 +30,19 @@ const VendorsSection = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState<"rating" | "distance" | "reviews">("rating");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [favorites, setFavorites] = useLocalStorage<string[]>("favorite_vendors", []);
+  const { 
+    vendors, 
+    favoriteVendors, 
+    loading, 
+    toggleFavorite: toggleFav, 
+    refreshVendors
+  } = useVendors();
   const { toast } = useToast();
-
-  const vendors: Vendor[] = [
-    {
-      id: "1",
-      name: "QuickFix Plumbing",
-      category: "Plumbing",
-      rating: 4.8,
-      reviews: 127,
-      distance: "0.3 km",
-      phone: "+1-555-0123",
-      address: "123 Main St, Downtown",
-      hours: "24/7 Emergency",
-      verified: true,
-      description: "Emergency plumbing services with 30+ years of experience.",
-      services: ["Emergency Repairs", "Pipe Installation", "Drain Cleaning"]
-    },
-    {
-      id: "2",
-      name: "Green Garden Care",
-      category: "Landscaping",
-      rating: 4.6,
-      reviews: 89,
-      distance: "0.7 km",
-      phone: "+1-555-0456",
-      address: "456 Oak Ave, Suburbs",
-      hours: "Mon-Sat 8AM-6PM",
-      verified: true,
-      description: "Eco-friendly landscaping and garden maintenance.",
-      services: ["Lawn Care", "Tree Trimming", "Garden Design"]
-    },
-    {
-      id: "3",
-      name: "City Electronics Repair",
-      category: "Electronics",
-      rating: 4.4,
-      reviews: 203,
-      distance: "1.2 km",
-      phone: "+1-555-0789",
-      address: "789 Tech Blvd, Tech District",
-      hours: "Mon-Fri 9AM-7PM",
-      verified: true,
-      description: "Professional repair services for all electronic devices.",
-      services: ["Phone Repair", "Computer Fix", "TV Service"]
-    },
-    {
-      id: "4",
-      name: "Reliable Cleaning Co",
-      category: "Cleaning",
-      rating: 4.9,
-      reviews: 156,
-      distance: "0.5 km",
-      phone: "+1-555-0321",
-      address: "321 Clean St, Downtown",
-      hours: "Mon-Sun 7AM-9PM",
-      verified: true,
-      description: "Professional cleaning services for homes and offices.",
-      services: ["House Cleaning", "Office Cleaning", "Deep Clean"]
-    }
-  ];
 
   const categories = ["All", "Plumbing", "Electrical", "Cleaning", "Landscaping", "Electronics", "Home Repair"];
 
   const toggleFavorite = (vendorId: string) => {
-    const isFavorite = favorites.includes(vendorId);
-    if (isFavorite) {
-      setFavorites(prev => prev.filter(id => id !== vendorId));
-      toast({
-        title: "Removed from Favorites",
-        description: "Vendor removed from your favorites.",
-      });
-    } else {
-      setFavorites(prev => [...prev, vendorId]);
-      toast({
-        title: "Added to Favorites",
-        description: "Vendor added to your favorites.",
-      });
-    }
+    toggleFav(vendorId);
   };
 
   const callVendor = (phone: string, name: string) => {
@@ -153,7 +86,7 @@ const VendorsSection = () => {
       return sortOrder === "asc" ? compareValue : -compareValue;
     });
 
-  const favoriteVendors = vendors.filter(vendor => favorites.includes(vendor.id));
+  const actualFavoriteVendors = vendors.filter(vendor => favoriteVendors.includes(vendor.id));
 
   const toggleSort = () => {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -174,7 +107,7 @@ const VendorsSection = () => {
             All Vendors {filteredVendors.length > 0 && <Badge variant="secondary" className="ml-1">{filteredVendors.length}</Badge>}
           </TabsTrigger>
           <TabsTrigger value="favorites">
-            Favorites {favoriteVendors.length > 0 && <Badge variant="secondary" className="ml-1">{favoriteVendors.length}</Badge>}
+            Favorites {actualFavoriteVendors.length > 0 && <Badge variant="secondary" className="ml-1">{actualFavoriteVendors.length}</Badge>}
           </TabsTrigger>
           <TabsTrigger value="verified">
             Verified {vendors.filter(v => v.verified).length > 0 && <Badge variant="secondary" className="ml-1">{vendors.filter(v => v.verified).length}</Badge>}
@@ -249,7 +182,7 @@ const VendorsSection = () => {
           {/* Vendors Grid/List */}
           <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-4"}>
             {filteredVendors.map((vendor) => {
-              const isFavorite = favorites.includes(vendor.id);
+              const isFavorite = favoriteVendors.includes(vendor.id);
               return (
                 <Card key={vendor.id} className="shadow-card hover:shadow-card-hover transition-shadow">
                   <CardHeader className="pb-3">
@@ -344,7 +277,7 @@ const VendorsSection = () => {
 
         <TabsContent value="favorites" className="mt-6">
           <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-4"}>
-            {favoriteVendors.length === 0 ? (
+            {actualFavoriteVendors.length === 0 ? (
               <Card className="p-8 text-center col-span-full">
                 <div className="text-muted-foreground">
                   <Heart className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -353,7 +286,7 @@ const VendorsSection = () => {
                 </div>
               </Card>
             ) : (
-              favoriteVendors.map((vendor) => (
+              actualFavoriteVendors.map((vendor) => (
                 <Card key={vendor.id} className="shadow-card hover:shadow-card-hover transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
@@ -406,7 +339,7 @@ const VendorsSection = () => {
         <TabsContent value="verified" className="mt-6">
           <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-4"}>
             {vendors.filter(v => v.verified).map((vendor) => {
-              const isFavorite = favorites.includes(vendor.id);
+              const isFavorite = favoriteVendors.includes(vendor.id);
               return (
                 <Card key={vendor.id} className="shadow-card hover:shadow-card-hover transition-shadow border-success/20">
                   <CardHeader className="pb-3">
