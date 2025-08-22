@@ -3,18 +3,15 @@ export interface Report {
   title: string;
   description: string;
   category: string;
-  location: {
-    address: string;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
-  };
-  image?: string;
+  location_address: string;
+  location_lat: number | null;
+  location_lng: number | null;
+  image_url?: string;
   status: 'draft' | 'submitted' | 'in_progress' | 'resolved';
   priority: 'low' | 'medium' | 'high';
-  timestamp: string;
-  isOffline?: boolean;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
 }
 
 export interface Announcement {
@@ -24,12 +21,9 @@ export interface Announcement {
   type: 'alert' | 'maintenance' | 'event' | 'update';
   priority: 'low' | 'medium' | 'high';
   authority: string;
-  timestamp: string;
+  created_at: string;
   location: string;
-  isOffline?: boolean;
-  hasAttachment?: boolean;
-  attachmentUrl?: string;
-  readAt?: string;
+  attachment_url?: string;
 }
 
 export interface Vendor {

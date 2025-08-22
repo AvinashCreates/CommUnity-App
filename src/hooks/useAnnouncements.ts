@@ -28,16 +28,10 @@ export const useAnnouncements = () => {
       if (error) throw error;
 
       const mappedAnnouncements: Announcement[] = data.map(announcement => ({
-        id: announcement.id,
-        title: announcement.title,
-        content: announcement.content,
+        ...announcement,
         type: announcement.type as Announcement['type'],
         priority: announcement.priority as Announcement['priority'],
-        authority: announcement.authority,
-        location: announcement.location,
-        timestamp: announcement.created_at,
-        hasAttachment: !!announcement.attachment_url,
-        attachmentUrl: announcement.attachment_url
+        created_at: announcement.created_at
       }));
 
       setAnnouncements(mappedAnnouncements);

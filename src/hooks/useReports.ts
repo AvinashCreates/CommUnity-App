@@ -29,21 +29,11 @@ export const useReports = () => {
       if (error) throw error;
 
       const mappedReports: Report[] = data.map(report => ({
-        id: report.id,
-        title: report.title,
-        description: report.description,
-        category: report.category,
-        location: {
-          address: report.location_address,
-          coordinates: {
-            lat: report.location_lat || 0,
-            lng: report.location_lng || 0
-          }
-        },
-        image: report.image_url,
+        ...report,
         status: report.status as Report['status'],
         priority: report.priority as Report['priority'],
-        timestamp: report.created_at
+        created_at: report.created_at,
+        updated_at: report.updated_at
       }));
 
       setReports(mappedReports);
@@ -58,7 +48,7 @@ export const useReports = () => {
     }
   };
 
-  const createReport = async (reportData: Omit<Report, 'id' | 'timestamp'>) => {
+  const createReport = async (reportData: Omit<Report, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     if (!user) return { error: new Error('User not authenticated') };
 
     try {
@@ -66,15 +56,7 @@ export const useReports = () => {
         .from('reports')
         .insert({
           user_id: user.id,
-          title: reportData.title,
-          description: reportData.description,
-          category: reportData.category,
-          location_address: reportData.location.address,
-          location_lat: reportData.location.coordinates.lat,
-          location_lng: reportData.location.coordinates.lng,
-          image_url: reportData.image,
-          status: reportData.status,
-          priority: reportData.priority
+          ...reportData
         })
         .select()
         .single();
@@ -99,23 +81,13 @@ export const useReports = () => {
     }
   };
 
-  const updateReport = async (id: string, updates: Partial<Report>) => {
+  const updateReport = async (id: string, updates: Partial<Omit<Report, 'id' | 'created_at' | 'updated_at' | 'user_id'>>) => {
     if (!user) return { error: new Error('User not authenticated') };
 
     try {
       const { error } = await supabase
         .from('reports')
-        .update({
-          title: updates.title,
-          description: updates.description,
-          category: updates.category,
-          location_address: updates.location?.address,
-          location_lat: updates.location?.coordinates.lat,
-          location_lng: updates.location?.coordinates.lng,
-          image_url: updates.image,
-          status: updates.status,
-          priority: updates.priority
-        })
+        .update(updates)
         .eq('id', id)
         .eq('user_id', user.id);
 

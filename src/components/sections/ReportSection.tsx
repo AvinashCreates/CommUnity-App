@@ -85,6 +85,7 @@ const ReportSection = () => {
         location_lat: 40.7128,
         location_lng: -74.0060,
         image_url: uploadedImage || undefined,
+        status: 'submitted',
         priority: 'medium'
       });
 
